@@ -7,7 +7,7 @@ def main():
     setup_logging()
     logger = logging.getLogger(__name__)
     logger.debug('Connecting to ftp')
-    # return ftp_transfer('test')
+    return ftp_transfer('test')
 
 
 if __name__ == "__main__":

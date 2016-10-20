@@ -3,14 +3,15 @@ from sqlalchemy.orm import sessionmaker
 from properties import get_property
 import logging
 
-SQLA_CONNECTION = get_property('properties.json', 'connection_string')
+logger = logging.getLogger(__name__)
 
 
 def get_engine():
-    return create_engine(SQLA_CONNECTION)
+    return create_engine(get_property('properties.json', 'connection_string'))
 
 
-def get_pending():
+def get_next_pending():
+    logger.info('Connect to DB and reflect PendingExtracts')
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -20,16 +21,45 @@ def get_pending():
                             meta,
                             autoload=True,
                             autoload_with=get_engine())
+    record = session.query(pending_records).first()
+    logger.info('Extracted records {row}'.format(row=record))
 
-    return session.query(pending_records).first()
+    return record
+
+
+def extract_xml(shift, season):
+    logger.info('Extracting xml for {shift}, {season}'.format(shift=shift, season=season))
+    conn = get_engine().raw_connection()
+    with conn.cursor(as_dict=True) as cursor:
+        cursor.callproc('GetExtract', (shift, season,))
+        for row in cursor:
+            results = row
+
+    return results
+
+
+def complete_shift(shift, season):
+    conn = get_engine().raw_connection()
+    with conn.cursor(as_dict=True) as cursor:
+        cursor.callproc('CloseUnloadQuantities', (shift, season,))
+        conn.commit()
+
+
+def get_next_extract():
+    next_shift = get_next_pending()
+    shift = {'shift': next_shift[0], 'season': next_shift[1]}
+    shift.update(extract_xml(shift['shift'], shift['season']))
+
+    return shift
 
 
 def test():
     Session = sessionmaker(bind=get_engine())
     session = Session()
-    pending = get_pending()
+    pending = get_next_pending()
     return session.query(pending).first()
 
 
 if __name__ == "__main__":
-    print(get_pending())
+    print(get_next_extract())
+    # print(get_next_pending())

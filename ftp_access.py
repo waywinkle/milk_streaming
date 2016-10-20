@@ -20,10 +20,11 @@ def ftp_transfer(string_to_send):
 
     ftp_command = 'STOR extract_' + time.strftime("%Y%m%d%H%m%S") + '.xml'
     logging.debug('ftp command : {ftp_command}'.format(ftp_command=ftp_command))
-    logging.debug('file : {file}'.format(file=create_file_from_text(string_to_send)))
-    logging.debug(ftp.nlst())
-    # response = ftp.storbinary(ftp_command, file)
-    # logger.debug('transfered file to server : {response}'.format(response=response))
+    file = create_file_from_text(string_to_send)
+    logging.debug('file : {file}'.format(file=file))
+
+    response = ftp.storbinary(ftp_command, file)
+    logger.debug('transfered file to server : {response}'.format(response=response))
 
     ftp.quit()
 
