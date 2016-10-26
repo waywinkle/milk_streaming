@@ -34,14 +34,24 @@ def extract_xml(shift, season):
         cursor.callproc('GetExtract', (shift, season,))
         for row in cursor:
             results = row
+        conn.commit()
 
     return results
 
 
 def complete_shift(shift, season):
+    logger.info('Closing shift for {shift}, {season}'.format(shift=shift, season=season))
     conn = get_engine().raw_connection()
     with conn.cursor(as_dict=True) as cursor:
         cursor.callproc('CloseUnloadQuantities', (shift, season,))
+        conn.commit()
+
+
+def fail_shift(shift, season):
+    logger.info('Failing shift for {shift}, {season}'.format(shift=shift, season=season))
+    conn = get_engine().raw_connection()
+    with conn.cursor(as_dict=True) as cursor:
+        cursor.callproc('FailUnloadQuantities', (shift, season,))
         conn.commit()
 
 
@@ -53,13 +63,18 @@ def get_next_extract():
     return shift
 
 
-def test():
-    Session = sessionmaker(bind=get_engine())
-    session = Session()
-    pending = get_next_pending()
-    return session.query(pending).first()
+def check_next_extract():
+    next_shift = get_next_pending()
+    shift = {'shift': next_shift[0], 'season': next_shift[1]}
+    send_failure = next_shift[2]
+    if send_failure == 1:
+        fail_shift(shift['shift'], shift['season'])
+        return False
+    else:
+        shift.update(extract_xml(shift['shift'], shift['season']))
+        return shift
 
 
 if __name__ == "__main__":
-    print(get_next_extract())
+    print(check_next_extract())
     # print(get_next_pending())
