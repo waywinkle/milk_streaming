@@ -1,0 +1,11 @@
+{
+  "ftp_address": "",
+  "ftp_username": "",
+  "ftp_password": "",
+  "ftp_directory": "",
+  "ftp_debug": 0,
+  "error_email": "",
+  "from_email": "",
+  "smtp_server": "",
+  "connection_string": ""
+}

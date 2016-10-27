@@ -11,7 +11,7 @@ def get_engine():
 
 
 def get_next_pending():
-    logger.info('Connect to DB and reflect PendingExtracts')
+    logger.debug('Connect to DB and reflect PendingExtracts')
     engine = get_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -69,12 +69,13 @@ def check_next_extract():
     send_failure = next_shift[2]
     if send_failure == 1:
         fail_shift(shift['shift'], shift['season'])
-        return False
+        shift['result'] = False
+        return shift
     else:
         shift.update(extract_xml(shift['shift'], shift['season']))
+        shift['result'] = True
         return shift
 
 
 if __name__ == "__main__":
     print(check_next_extract())
-    # print(get_next_pending())
