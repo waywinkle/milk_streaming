@@ -19,6 +19,9 @@ def main():
             file_name = str(extract['season']) + '_' + str(extract['shift']) + '_' + strftime("%Y%m%d%H%m%S")
             ftp_transfer(extract['xml_output'], file_name)
             complete_shift(extract['shift'], extract['season'])
+            send_mail('Shift: {shift}, season: {season} was sent successfully'.format(shift=extract['shift'],
+                                                                                      season=extract['season']),
+                      'Send success')
         else:
             send_mail('Shift: {shift}, season: {season} was unable to be sent'.format(shift=extract['shift'],
                                                                                       season=extract['season']),
