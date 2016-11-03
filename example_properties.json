@@ -7,5 +7,6 @@
   "error_email": "",
   "from_email": "",
   "smtp_server": "",
-  "connection_string": ""
+  "connection_string": "",
+  "python_path": ""
 }
