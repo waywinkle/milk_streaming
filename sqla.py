@@ -34,7 +34,7 @@ def extract_xml(shift, season):
         cursor.callproc('GetExtract', (shift, season,))
         for row in cursor:
             results = row
-        conn.commit()
+    conn.commit()
 
     return results
 
@@ -78,4 +78,4 @@ def check_next_extract():
 
 
 if __name__ == "__main__":
-    print(check_next_extract())
+    print(extract_xml('28', '2017'))
