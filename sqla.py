@@ -65,17 +65,19 @@ def get_next_extract():
 
 def check_next_extract():
     next_shift = get_next_pending()
-    shift = {'shift': next_shift[0], 'season': next_shift[1]}
-    send_failure = next_shift[2]
-    if send_failure == 1:
-        fail_shift(shift['shift'], shift['season'])
-        shift['result'] = False
-        return shift
+    if next_shift:
+        shift = {'shift': next_shift[0], 'season': next_shift[1]}
+        send_failure = next_shift[2]
+        if send_failure == 1:
+            fail_shift(shift['shift'], shift['season'])
+            shift['result'] = False
+            return shift
+        else:
+            shift.update(extract_xml(shift['shift'], shift['season']))
+            shift['result'] = True
+            return shift
     else:
-        shift.update(extract_xml(shift['shift'], shift['season']))
-        shift['result'] = True
-        return shift
-
+        return None
 
 if __name__ == "__main__":
-    print(extract_xml('28', '2017'))
+    print(check_next_extract())

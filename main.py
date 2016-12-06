@@ -14,7 +14,9 @@ def main():
     logger.debug('extracting from db')
     try:
         extract = check_next_extract()
-        if extract['result']:
+        if not extract:
+            logger.debug('No pending extracts')
+        elif extract['result']:
             logger.debug('valid extract so upload to ftp')
             file_name = str(extract['season']) + '_' + str(extract['shift']) + '_' + strftime("%Y%m%d%H%m%S")
             ftp_transfer(extract['xml_output'], file_name)
@@ -30,8 +32,12 @@ def main():
         exc_type, exc_value, exc_traceback = sys.exc_info()
         lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
         e = ''.join(line for line in lines)
-        message = 'Shift: {shift}, season: {season} failed on processing \n'.format(shift=extract['shift'],
-                                                                                    season=extract['season'])
+        if extract['shift'] and extract['season']:
+            message = 'Shift: {shift}, season: {season} failed on processing \n'.format(shift=extract['shift'],
+                                                                                        season=extract['season'])
+        else:
+            message = 'MSA error on processing.'
+
         message += e
         logger.exception('Error occurred during processing')
         send_mail(message, 'Send error')
